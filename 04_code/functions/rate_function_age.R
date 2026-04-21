@@ -13,37 +13,6 @@
 # In counts (stochastic SSA):         lambda_foi = beta %*% (I / N)
 # because I_proportion = I_count / N
 
-
-# ── Intervention functions ────────────────────────────────────────────────────
-
-u_func_WMR_age <- function(t, params) {
-  # Wait-Maintain-Relax (Miclo et al.) for the age-structured model
-  #
-  # In the non-structured model: u = 1 - 1/(R0 * S)
-  # where R0 = beta/gamma and S is the current susceptible proportion.
-  #
-  # In the age-structured model, R_eff depends on the spectral radius of 
-  # the next-generation matrix, not just total S. As a simple approximation, 
-  # we use R_eff ≈ R0_target * (S_total / N).
-  #
-  # params must contain: t1, t2, R0_target, S_total (updated by ratefunc), N
-  
-  S_frac <- params$S_total / params$N
-  u <- (t > params$t1) * (t < params$t2) * (1 - 1 / (params$R0_target * S_frac))
-  u <- max(0, min(u, 1))
-  return(u)
-}
-
-u_func_constant_age <- function(t, params) {
-  # Constant intervention (Britton et al. 2023)
-  # Identical to the non-structured version — u is a scalar.
-  # params must contain: t1, t2, lev
-  
-  u <- params$lev * (t > params$t1) * (t < params$t2)
-  return(u)
-}
-
-
 # ── Transition matrix ─────────────────────────────────────────────────────────
 # For ssa.adaptivetau: each row is a transition, each column is a state variable.
 # State order: (S1, ..., Sn, I1, ..., In, R1, ..., Rn)
@@ -116,7 +85,7 @@ create_intervention_matrix <- function(u, W = NULL) {
 
 # ── Rate function for ssa.adaptivetau ─────────────────────────────────────────
 
-ratefunc.SIR.age <- function(state, params, t) {
+ratefunc.SIR <- function(state, params, t) {
   
   # Rate function for the ssa.adaptivetau function (age-structured SIR)
   #
