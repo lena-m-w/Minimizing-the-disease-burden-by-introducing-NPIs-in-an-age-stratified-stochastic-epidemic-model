@@ -44,8 +44,8 @@ ratefunc.SIR <- function(state, params, t){
 ratefunc.SIR.age <- function(state, params, t) {
   # rate function for the ssa.adaptivetau function
   # parameters are: state (S, I , R), params (parameters for the u function and additional parameters needed), t (time)
-  # params must include: t1 (start of intervention), t2 (stop of intervention), N, 
-  # beta, gamma, lambda (influx rate), lev (intensity of intervention),  u_func= function(t, params){return(0)}, influx = FALSE,
+  # params must include:  f(population proportions), t1 (start of intervention), t2 (stop of intervention), N, 
+  # beta (matrix, -log(1-p)*C(contact matrix)), gamma, lambda (influx rate), lev (intensity of intervention),  u_func = function(t, params){return(0)}, influx = FALSE,
   # u_func (intervention function, parameters of intervention function are t and params)
   
   n  <- params$n_age

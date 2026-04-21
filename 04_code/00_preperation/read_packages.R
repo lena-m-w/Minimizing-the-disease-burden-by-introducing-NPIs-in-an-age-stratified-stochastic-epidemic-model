@@ -1,3 +1,4 @@
+library(socialmixr)
 
 library(adaptivetau)
 
