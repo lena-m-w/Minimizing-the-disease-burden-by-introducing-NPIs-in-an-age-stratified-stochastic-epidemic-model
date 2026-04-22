@@ -23,7 +23,7 @@ u_func_constant_age <- function(t, params) {
   #       cost rate = sum(lev) when active, all groups stop together
   
 
-t2 <- params$t1 + params$budget / params$lev
+  t2 <- params$t1 + params$budget / params$lev
 
   
   active <- (t > params$t1) * (t < t2)
@@ -35,7 +35,10 @@ t2 <- params$t1 + params$budget / params$lev
 
 u_func_none <- function(t, params) {
   # No intervention (baseline / do-nothing scenario)
+  
   u <- rep(0, length(params$age_names))
   names(u) <- params$age_names
+  
   return(u)
+  
 }

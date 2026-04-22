@@ -2,12 +2,12 @@
 #
 run.replicates <- function(n_rep = 200, init,transitions_influx = rbind(S = c(-1,  0,  -1), I = c(+1, -1, +1), R = c( 0, +1,  0)),
                            ratefunc, params, tf = 100, dt = 0.5, tl.params = list(epsilon = 0.05)) {
-  
+ # params, params_adaptive_tau)
   # Function to run a single replicate
   
   run_one <- function(i) {
     
-    sim <- simulate.stochastic(init = init, ratefunc = ratefunc, params = params)
+    sim <- simulate.stochastic(params = params, params_adaptive_tau = params_adaptive_tau)
     
     simS = sim$S
     simI_prop = sim$I_prop

@@ -13,6 +13,7 @@ cm2 <- contact_matrix(polymod, countries = "Finland",
 # same recovery rate in all groups
 
 C_per_capita <- cm$matrix.per.capita
+f <- cm$demography$proportion
 R0_target <- 3
 gamma     <- 0.2
 

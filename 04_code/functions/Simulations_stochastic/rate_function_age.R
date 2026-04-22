@@ -23,7 +23,7 @@
 #   Row n_age + a: recovery  in group a  → I_a - 1, R_a + 1
 #   (Row 2*n_age + a: influx into S_a    → S_a + 1,  if influx = TRUE)
 
-build_transitions_age <- function(n_age, influx = FALSE) {
+'build_transitions_age <- function(n_age, influx = FALSE) {
   
   n_trans <- 2 * n_age
   if (influx) n_trans <- n_trans + n_age
@@ -52,8 +52,37 @@ build_transitions_age <- function(n_age, influx = FALSE) {
   }
   
   return(trans)
+}'
+build_transitions_age <- function(n_age, influx = FALSE) {
+  
+  state_names <- c(paste0("S", 1:n_age),
+                   paste0("I", 1:n_age),
+                   paste0("R", 1:n_age))
+  
+  transitions <- list()
+  
+  for (a in 1:n_age) {
+    # Infection in group a: S_a -1, I_a +1
+    tr <- setNames(c(-1, +1), c(paste0("S", a), paste0("I", a)))
+    transitions[[length(transitions) + 1]] <- tr
+  }
+  
+  for (a in 1:n_age) {
+    # Recovery in group a: I_a -1, R_a +1
+    tr <- setNames(c(-1, +1), c(paste0("I", a), paste0("R", a)))
+    transitions[[length(transitions) + 1]] <- tr
+  }
+  
+  if (influx) {
+    for (a in 1:n_age) {
+      # Influx into S_a: S_a +1
+      tr <- setNames(c(+1), paste0("S", a))
+      transitions[[length(transitions) + 1]] <- tr
+    }
+  }
+  
+  return(transitions)
 }
-
 create_intervention_matrix <- function(u, W = NULL) {
   # Creates the intervention matrix U from age-group-specific levels u
   # and an optional scaling matrix W.
@@ -86,7 +115,7 @@ create_intervention_matrix <- function(u, W = NULL) {
 
 # ── Rate function for ssa.adaptivetau ─────────────────────────────────────────
 
-ratefunc.SIR.age <- function(state, params, t) {
+ratefunc.SIR<- function(state, params, t) {
   
   # Rate function for the ssa.adaptivetau function (age-structured SIR)
   #
