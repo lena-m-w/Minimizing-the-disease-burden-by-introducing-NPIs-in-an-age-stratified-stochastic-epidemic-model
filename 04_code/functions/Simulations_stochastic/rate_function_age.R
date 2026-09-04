@@ -113,7 +113,7 @@ create_intervention_matrix <- function(u, W = NULL) {
   return(U*W)
   }
 
-# ── Rate function for ssa.adaptivetau ─────────────────────────────────────────
+#  Rate function for ssa.adaptivetau
 
 ratefunc.SIR<- function(state, params, t) {
   
@@ -164,49 +164,3 @@ ratefunc.SIR<- function(state, params, t) {
     return(c(infection_rates, recovery_rates, params$lambda_vec))
   }
 }
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# EXAMPLE USAGE
-# ══════════════════════════════════════════════════════════════════════════════
-#
-# library(adaptivetau)
-#
-# # --- beta matrix (from your existing code) ---
-# # beta is already defined as: beta <- const * C_per_capita
-# # (a 3x3 matrix, NOT a scalar)
-#
-# # --- Parameters ---
-# N <- 10e6
-# n_age <- 3
-# 
-# params <- list(
-#   n_age      = n_age,
-#   beta       = beta,          # 3x3 matrix
-#   gamma      = gamma,         # 0.2
-#   N          = N,
-#   t1         = 25,
-#   t2         = 45,
-#   lev        = 0.75,
-#   R0_target  = R0_target,     # 3.0 (needed for WMR)
-#   u_func     = u_func_constant_age,
-#   influx     = FALSE
-# )
-#
-# # --- Initial state (absolute counts) ---
-# I0_total <- 1e-4 * N         # = 1000 for N=10e6 (like Britton)
-# I0 <- round(I0_total * f)
-# I0[I0 == 0] <- 1
-# S0 <- round(f * N) - I0
-# R0_init <- rep(0, n_age)
-#
-# state0 <- c(S0, I0, R0_init)
-# names(state0) <- c(paste0("S", 1:n_age),
-#                     paste0("I", 1:n_age),
-#                     paste0("R", 1:n_age))
-#
-# # --- Build transition matrix ---
-# trans <- build_transitions_age(n_age = 3, influx = TRUE)
-#
-# # --- Run ---
-# result_ssa <- ssa.adaptivetau(state0, trans, ratefunc.SIR.age, params, tf = 200)
