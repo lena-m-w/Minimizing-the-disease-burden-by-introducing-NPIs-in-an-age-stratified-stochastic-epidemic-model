@@ -1,3 +1,7 @@
+# Computes group specific fatalities of disease
+#
+# AI used to check correctness of code, write some lines and comments and to debug
+
 compute_burden <- function(out, params) {
   n  <- params$n_age
   Nv <- params$f *params$N
