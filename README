@@ -1,3 +1,70 @@
-04_code contains an outdated version of the code (five months old). 
+# Optimal Non-Pharmaceutical Intervention Strategies for Minimising Disease Burden in Stochastic and Age-Structured Epidemic Models
 
-An updated version, together with proper documentation, will be published on GitHub by 10.09.2026. The code still needs some restructuring before publication.
+Lena M Weyer
+Master's Thesis
+Biostatistics and Data Science (KI, KTH, SU)
+2026
+
+## Requirements
+
+- R version 4.6.1
+- Required packages: socialmixr, adaptivetau, deSolve, parallel 
+
+
+## How to run
+
+Run the scripts in order:
+
+1. `run_code.R ` – defines paths and loads functions
+2. Experiment you want to run, run 1. again before running next experiment.
+
+Make sure folders data will be saved in in experiment exists.
+
+## Project structure
+
+Minimizing-the-disease-burden-by-introducing-NPIs-in-an-age-stratified-stochastic-epidemic-model/
+├── 01_Code_thesis_submission_September_2026/
+│   └── analysis/          # new code
+│       ├── 00_preparation/
+│       │   ├── read_packages.R               # loads required R packages
+│       │   └── run_code.R                    # defines paths and runs the scripts
+|       ├── data_preperation/
+│       │   └── contact_matrix.R   
+|       ├── Experiment_age/
+│       │   └── contact_matrix.R 
+│       └── functions/   
+│           ├── Simulations_deterministic/ 
+│           │   ├── det_SIR_with_influx.R
+│           │   ├── deterministic_SIR.R
+│           │   └── deterministic_SIR_with_age.R   
+│           ├── Simulations_stochastic/   
+│           |  ├── initiaization_initial_state.R
+│           |  ├── intervention_functions.R
+│           |  ├── Multi_replicate_simulation.R
+│           |  ├── rate_and_intervention_functions.R
+│           |  ├── rate_function_age.R
+│           |  └── Simulation_wrapper.R      
+│           └── rate_function_age.R           
+├── 04_code/ # 5 months old code
+│   ├── 00_preparation/
+│   │   ├── read_packages.R               # loads required R packages
+│   │   └── run_code.R                    # defines paths and runs the scripts
+│   ├── data_preperation/
+|   │   └── contact_matrix.R   
+│   └── functions/
+│       ├── Simulations_deterministic/ 
+│       │   ├── det_SIR_with_influx.R
+│       │   ├── deterministic_SIR.R
+│       │   └── deterministic_SIR_with_age.R   
+│       ├── Simulations_stochastic/   
+│       |  ├── initiaization_initial_state.R
+│       |  ├── intervention_functions.R
+│       |  ├── Multi_replicate_simulation.R
+│       |  ├── rate_and_intervention_functions.R
+│       |  ├── rate_function_age.R
+│       |  └── Simulation_wrapper.R    
+│       └── rate_function_age.R           
+├── .gitignore
+├── CHANGELOG
+├── Minimizing-the-disease-burden-b...
+└── README
