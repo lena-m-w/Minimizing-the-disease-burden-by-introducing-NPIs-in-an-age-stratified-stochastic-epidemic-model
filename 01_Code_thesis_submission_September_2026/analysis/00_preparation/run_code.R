@@ -1,3 +1,9 @@
+# Directory paths and loading of functions
+# 
+# In this file the project paths are defined and the scripts containing the main functions are seourced.
+#
+# no AI used
+
 rm (list = ls())
 path_wd = "/home/lena/Minimizing-the-disease-burden-by-introducing-NPIs-in-an-age-stratified-stochastic-epidemic-model"
 path_preparation = "/04_code/00_preparation"
