@@ -5,7 +5,7 @@
 # no AI used
 
 rm (list = ls())
-path_wd = getwd()
+path_wd = getwd() # or your path
 path_preparation = "/04_code/00_preparation"
 path_functions = "/04_code/functions"
 path_stochastic_functions = "/04_code/functions/Simulations_stochastic"
