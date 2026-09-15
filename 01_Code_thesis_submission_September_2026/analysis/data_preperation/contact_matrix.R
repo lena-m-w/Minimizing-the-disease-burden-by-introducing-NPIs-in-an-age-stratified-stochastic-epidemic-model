@@ -2,7 +2,7 @@
 #
 # Calculate transmission rate and calibrate contact matrix and check for validity of calculations. 
 #
-# AI used to understand contact_matrix function and to check correctness of code
+# AI used to check correctness of code and to debugg
 
 #d1 = data(polymod)
 data(polymod)
