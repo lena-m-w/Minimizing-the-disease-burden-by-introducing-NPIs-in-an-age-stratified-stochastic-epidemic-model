@@ -5,7 +5,7 @@
 # no AI used
 
 rm (list = ls())
-path_wd = "/home/lena/Minimizing-the-disease-burden-by-introducing-NPIs-in-an-age-stratified-stochastic-epidemic-model"
+path_wd = getwd()
 path_preparation = "/04_code/00_preparation"
 path_functions = "/04_code/functions"
 path_stochastic_functions = "/04_code/functions/Simulations_stochastic"
