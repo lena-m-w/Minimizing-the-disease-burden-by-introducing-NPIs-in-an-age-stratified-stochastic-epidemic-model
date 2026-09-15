@@ -1,3 +1,9 @@
+# Contact matrix
+#
+# Calculate transmission rate and calibrate contact matrix and check for validity of calculations. 
+#
+# AI used to understand contact_matrix function and to check correctness of code
+
 #d1 = data(polymod)
 data(polymod)
 create_beta <- function(survey = polymod, countries = "Finland", age_limits = c(0, 20, 65), 
@@ -20,8 +26,7 @@ gamma     <- gamma
 
 
 # Next-generation matrix: R = -log(1-p)*1/gamma*C*N^bar/N
-# Wenn C schon durch N geteilt wird beim per capita, bin mir nicht sicher, 
-# ob es hier noch mal durch N geteilt werden muss
+
 # biggest eigenvalue of R is R_0
 # beta = -log(1-p)*C
 # Definitions see report
