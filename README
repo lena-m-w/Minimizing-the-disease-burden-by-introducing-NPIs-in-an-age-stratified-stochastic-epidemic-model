@@ -43,7 +43,8 @@ Minimizing-the-disease-burden-by-introducing-NPIs-in-an-age-stratified-stochasti
 │           |  ├── Multi_replicate_simulation.R
 │           |  ├── rate_and_intervention_functions.R
 │           |  ├── rate_function_age.R
-│           |  └── Simulation_wrapper.R      
+│           |  └── Simulation_wrapper.R   
+|           ├── compute_burden.R  
 │           └── rate_function_age.R           
 ├── 04_code/ # 5 months old code
 │   ├── 00_preparation/
