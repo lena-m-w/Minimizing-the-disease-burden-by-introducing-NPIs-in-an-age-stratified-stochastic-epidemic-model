@@ -1,26 +1,15 @@
-# Age-structured rate and intervention functions
-# This file contains the rate function that has to be forwarded to the 
-# ssa.adaptivetau function and the intervention functions needed to use 
-# the rate function.
-# Extends rate_and_intervention_functions.R to n age groups.
-#
-# Key difference from the non-structured version:
-#   - beta is a MATRIX (beta_ab = const * C_per_capita), not a scalar
-#   - state is a named vector: (S1, S2, ..., I1, I2, ..., R1, R2, ...)
-#   - the rate function returns n_age infection rates + n_age recovery rates
-#
-# In proportions (deterministic ODE): lambda_foi = beta %*% I
-# In counts (stochastic SSA):         lambda_foi = beta %*% (I / N)
-# because I_proportion = I_count / N
-
-# ── Transition matrix ─────────────────────────────────────────────────────────
+# Transition matrix:
 # For ssa.adaptivetau: each row is a transition, each column is a state variable.
 # State order: (S1, ..., Sn, I1, ..., In, R1, ..., Rn)
 #
 # Transitions:
-#   Row a        : infection in group a  → S_a - 1, I_a + 1
-#   Row n_age + a: recovery  in group a  → I_a - 1, R_a + 1
-#   (Row 2*n_age + a: influx into S_a    → S_a + 1,  if influx = TRUE)
+#   Row a        : infection in group a  -> S_a - 1, I_a + 1
+#   Row n_age + a: recovery  in group a -> I_a - 1, R_a + 1
+#   (Row 2*n_age + a: influx into S_a -> S_a + 1,  if influx = TRUE)
+
+# This script was adapted from a code skeleton generated with AI Claude Opus 4.7.
+# I have either written or carefully checked and tested the code and take responsibility for its correctness.
+
 
 build_transitions_age <- function(n_age, influx = FALSE) {
   
@@ -53,6 +42,27 @@ build_transitions_age <- function(n_age, influx = FALSE) {
   return(trans)
 }
 
+
+# trans <- build_transitions_age(n_age = 3, influx = TRUE)
+
+
+#################################################################
+# not relevant anymore
+# Age-structured rate and intervention functions
+# This file contains the rate function that has to be forwarded to the 
+# ssa.adaptivetau function and the intervention functions needed to use 
+# the rate function.
+# Extends rate_and_intervention_functions.R to n age groups.
+#
+# Key difference from the non-structured version:
+#   - beta is a MATRIX (beta_ab = const * C_per_capita), not a scalar
+#   - state is a named vector: (S1, S2, ..., I1, I2, ..., R1, R2, ...)
+#   - the rate function returns n_age infection rates + n_age recovery rates
+#
+# In proportions (deterministic ODE): lambda_foi = beta %*% I
+# In counts (stochastic SSA):         lambda_foi = beta %*% (I / N)
+# because I_proportion = I_count / N
+###############################################################
 create_intervention_matrix <- function(u, W = NULL) {
   # Creates the intervention matrix U from age-group-specific levels u
   # and an optional scaling matrix W.
@@ -135,48 +145,3 @@ ratefunc.SIR <- function(state, params, t) {
   }
 }
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-# EXAMPLE USAGE
-# ══════════════════════════════════════════════════════════════════════════════
-#
-# library(adaptivetau)
-#
-# # --- beta matrix (from your existing code) ---
-# # beta is already defined as: beta <- const * C_per_capita
-# # (a 3x3 matrix, NOT a scalar)
-#
-# # --- Parameters ---
-# N <- 10e6
-# n_age <- 3
-# 
-# params <- list(
-#   n_age      = n_age,
-#   beta       = beta,          # 3x3 matrix
-#   gamma      = gamma,         # 0.2
-#   N          = N,
-#   t1         = 25,
-#   t2         = 45,
-#   lev        = 0.75,
-#   R0_target  = R0_target,     # 3.0 (needed for WMR)
-#   u_func     = u_func_constant_age,
-#   influx     = FALSE
-# )
-#
-# # --- Initial state (absolute counts) ---
-# I0_total <- 1e-4 * N         # = 1000 for N=10e6 (like Britton)
-# I0 <- round(I0_total * f)
-# I0[I0 == 0] <- 1
-# S0 <- round(f * N) - I0
-# R0_init <- rep(0, n_age)
-#
-# state0 <- c(S0, I0, R0_init)
-# names(state0) <- c(paste0("S", 1:n_age),
-#                     paste0("I", 1:n_age),
-#                     paste0("R", 1:n_age))
-#
-# # --- Build transition matrix ---
-# trans <- build_transitions_age(n_age = 3, influx = TRUE)
-#
-# # --- Run ---
-# result_ssa <- ssa.adaptivetau(state0, trans, ratefunc.SIR.age, params, tf = 200)
