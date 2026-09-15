@@ -1,5 +1,5 @@
 rm (list = ls())
-path_wd = "/home/lena/persoenliches_interesse/lernen/Studium/Biostatistiks_and_Data_Science/4.Semester/Masterarbeit/"
+path_wd = getwd() # or your personal path
 source(paste0(path_wd,"04_code/Code_self/","read_packages.R"))
 source(paste0(path_wd,"04_code/Code_self/","rate_and_intervention_functions.R"))
 source(paste0(path_wd,"04_code/Code_self/","Simulation_wrapper.R"))
