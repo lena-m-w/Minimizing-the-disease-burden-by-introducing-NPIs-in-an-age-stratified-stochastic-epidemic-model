@@ -1,5 +1,35 @@
 # Optimal Non-Pharmaceutical Intervention Strategies for Minimising Disease Burden in Stochastic and Age-Structured Epidemic Models
 
+Abstract: 
+Early in the COVID-19 epidemic, before vaccines were available, limiting the spread of infection
+depended on non-pharmaceutical interventions (NPIs). NPIs are interventions like lockdowns
+and can only be sustained for a limited time. This raises the question of how best to deploy a
+limited amount of intervention to reduce the total final number of infections or fatalities.
+For a deterministic, homogeneous SIR model the answer is known. Under a fixed intervention
+budget and maximum intervention, the total number of infections is minimised by a single
+constant-level intervention started at one optimal time. The question remains how far that
+result carries over to more realistic settings. Two models are explored in this report. The first
+introduces randomness in a finite population, together with a possible influx of infections from
+outside. The second adds age structure, splitting the population into a younger and an older
+group and measuring fatalities. A central question is how to optimally time an intervention in
+these models.
+We find that the deterministic timing remains a good guide whenever the epidemic is certain
+to take off. The epidemic almost always takes off when the initial number of infected individuals
+is large enough and whenever infection is continually reintroduced from outside. This guide
+breaks down only when take-off is itself uncertain. In an isolated population seeded by a single
+infection an early intervention can prevent the epidemic from taking off. In this case the best
+strategy is to act immediately. This effect is fragile and concerns the typical outcome only;
+when guarding against the worst cases, a timing close to the deterministic optimum applies, in
+large populations.
+With age structure the decision is not only when to intervene but how to divide the budget
+between contacts within each group and contacts between them. Protecting the small,
+high-mortality elderly group is cheap. Therefore, most fatalities are prevented by an early,
+long-sustained restriction of contacts within the elderly group and between the two groups. Re-
+stricting contacts in the big low mortality younger group is less efficient at minimising fatalities.
+For this group a short intervention starting close to the herd immunity threshold (similar to the
+deterministic optimum) is selected by the optimisation algorithm.
+
+
 Lena M Weyer
 Master's Thesis
 Biostatistics and Data Science (KI, KTH, SU)
