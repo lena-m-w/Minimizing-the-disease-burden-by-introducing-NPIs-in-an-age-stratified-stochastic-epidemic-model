@@ -1,6 +1,6 @@
 
 # Deterministic epidemic
-#with influx
+
 # Inspired by and similar to the code of Lasse Leskelä, from the paper of Britton and Leskelä 2023
 
 
@@ -21,7 +21,7 @@ SIR.ode <- function(t, state, par) {
 
 
 
-SIR.1LD.ode <- function(t, state, par) {
+SIR.1LD.ode <- function(t, state, par) { #with influx
   
   with(as.list(c(state, par)), {
     
