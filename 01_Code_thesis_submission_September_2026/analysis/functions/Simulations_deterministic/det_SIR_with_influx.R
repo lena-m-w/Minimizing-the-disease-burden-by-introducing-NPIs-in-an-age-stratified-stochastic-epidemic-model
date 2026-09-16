@@ -1,7 +1,7 @@
 
 # Deterministic epidemic
 #with influx
-
+# Inspired by and similar to the code of Lasse Leskelä, from the paper of Britton and Leskelä 2023
 
 
 
