@@ -1,0 +1,323 @@
+# Comparison of stochastic vs deterministic trajectories,
+# with and without intervention, for N = 1,000, 50,000 and 100,000.
+#
+# Run run_code.R before running this script.
+#
+# AI use: parts of the script were written with the help of AI
+# based on detailed description from the author (plotting code,
+# some individual lines, and the cat() statements and for organising the
+# matrices). All code was written or reviewed and tested by the author.
+
+
+# Source code 
+
+out_dir <- file.path(path_wd, path_results_data)
+
+#1. Parameters
+gamma     <- 0.2
+beta <- 0.6
+R0_target <- 3
+
+lev        <- 0.75
+budget <- 15
+t1         <- 23.6
+
+I0_total <- 1e-4
+tf       <- 365
+dt  <- 0.5
+
+n_rep <- 1000
+N <- c(10000, 50000, 100000)
+
+budget_count            <- FALSE
+intervention_activation <- FALSE
+last_time_tracking      <- FALSE
+influx                  <- FALSE
+
+init_prop <- list(
+  S = 1 - I0_total,
+  I = I0_total ,
+  R = 0
+)
+
+# 2.Deterministic curves, with and without intervention
+run_det <- function(with_intervention) {
+  if (with_intervention) {
+    epar <- list(
+      n_age     = 1,
+      beta      = beta,
+      gamma     = gamma,
+      t1        = t1,
+      lev       = lev,
+      f         = 1,
+      budget    = budget,
+      u_func    = u_func_constant_analytical,
+      influx    = FALSE,
+      W         = NULL,
+      state_tb  = NULL,
+      params    = list(influx = FALSE)
+    )
+  } else {
+    epar <- list(
+      n_age     = 1,
+      age_names = "all",
+      beta      = beta,
+      gamma     = gamma,
+      t1        = t1,                
+      lev       = 0,
+      f         = 1,
+      budget    = 0,
+      u_func    = u_func_none,
+      influx    = FALSE,
+      W         = NULL,
+      state_tb  = NULL,
+      params    = list(influx = FALSE)
+    )
+  }
+  
+det_df <- run.age.deterministic(
+  SIR.age.intervention.ode,
+  epar      = epar,
+  init_prop = init_prop,
+  tf        = tf,
+  dt        = dt
+)
+S_start <- sum(det_df[1,2])
+list(
+  time    = det_df$time,
+  cum_inc = 1 - rowSums(as.matrix(det_df[, 2])) / S_start,
+  inf_sh  = rowSums(as.matrix(det_df[, 3]))
+)
+}
+
+det_int   <- run_det(with_intervention = TRUE)
+det_noint <- run_det(with_intervention = FALSE)
+
+# Intervention end time
+duration_det <- budget /lev 
+t2_det       <- t1 + duration_det
+
+# Intervention u(t) for the bottom row
+det_u_int   <- ifelse(det_int$time   > t1 & det_int$time   < t2_det, lev, 0)
+det_u_noint <- rep(0, length(det_noint$time))
+
+
+# 3.Sochastic curves
+
+t <- seq(0, tf, by = dt)
+
+# initialise list to save results 
+scenarios <- c("intervention", "no_intervention")
+results <- list()
+for (sc in scenarios) results[[sc]] <- vector("list", length(N))
+for (sc in scenarios) names(results[[sc]]) <- as.character(N)
+
+# create transition matrix
+transitions <- build_transitions_age(
+  n_age = 1, influx = influx,   budget_count = FALSE,
+  intervention_activation = FALSE,
+  last_time_tracking = FALSE
+)
+
+# run stochastic simulation
+for (sc in scenarios) {
+  cat(sprintf("\n====== scenario: %s ======\n", sc))
+  u_func_use <- if (sc == "intervention") u_func_constant_rr else u_func_none
+  
+  for (k in seq_along(N)) {
+    Nk <- N[k]
+    cat(sprintf("\n--- N = %d ---\n", Nk))
+    
+    init_state_counts <- ceiling(init_age_state(
+      I0_total, 1, "all",
+      budget_count = FALSE,
+      intervention_activation = FALSE,
+      last_time_tracking = FALSE
+    ) * Nk)
+    
+    params_adaptive_tau <- list(
+      init          = init_state_counts,
+      transitions   = transitions,
+      ratefunc      = ratefunc.SIR,
+      tf            = tf,
+      jacobianFunc  = NULL, maxTauFunc = NULL,
+      deterministic = FALSE, halting = NULL,
+      relratechange = rep(1, length(init_state_counts)),
+      tl.params     = list(epsilon = 0.05),
+      reportTransitions = FALSE
+    )
+    
+    
+    params <- list(
+      n_age      = 1,
+      age_names  = "all",
+      beta       = beta,
+      gamma      = gamma,
+      lambda_influx = 0,
+      N          = Nk,
+      f          = 1,
+      t1         = t1,
+      lev        = lev,
+      budget     = budget,
+      u_func     = u_func_use,
+      influx     = FALSE,
+      W          = NULL,
+      budget_count = FALSE,
+      intervention_activation = FALSE,
+      last_time_tracking = FALSE
+    )
+    # run stochastic simulations
+    res <- run.replicates.age(
+      n_rep               = n_rep,
+      params              = params,
+      params_adaptive_tau = params_adaptive_tau
+    )
+    
+    # create result matrix 
+    cummulative_epi_size_matrix <- matrix(NA, nrow = length(t), ncol = n_rep)
+    infected_share_matrix  <- matrix(NA, nrow = length(t), ncol = n_rep)
+    
+    for (i in seq_len(n_rep)) {
+      sim <- res$all_simulation_results[[i]]
+      
+      S_start <- sim$S_total[1]
+      cum_epi_i  <- 1 - sim$S_total / S_start
+      inf_sh_i  <- sim$I_total_prop
+      
+      cummulative_epi_size_matrix [, i] <- approx(sim$time, cum_epi_i, xout = t,
+                                 method = "constant", rule = 2, f = 0)$y
+      infected_share_matrix[, i]  <- approx(sim$time, inf_sh_i,  xout = t,
+                                 method = "constant", rule = 2, f = 0)$y
+    }
+    
+    results[[sc]][[k]] <- list(cum_inc = cummulative_epi_size_matrix , inf_sh = infected_share_matrix)
+  }
+}
+
+# summarize results
+
+summarise_per_N <- function(mat) {
+  list(
+    median = apply(mat, 1, median),
+    q95    = apply(mat, 1, quantile, probs = 0.95, na.rm = TRUE)
+  )
+}
+
+summ <- list()
+for (sc in scenarios) {
+  summ[[sc]] <- list(
+    cum_inc = lapply(results[[sc]], function(x) summarise_per_N(x$cum_inc)),
+    inf_sh  = lapply(results[[sc]], function(x) summarise_per_N(x$inf_sh))
+  )
+}
+
+
+# Plots
+if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+out_path <- file.path(out_dir, "Exp1_plot_option_A_intervention_vs_none.png")
+
+n_N    <- length(N)
+N_lab  <- paste0("N = ", format(N, big.mark = ","))
+
+# Colours: same palette across both columns so the same N is visually
+# matched between scenarios. Yellow / red / blue — three primaries, all
+# well-separated in hue and naturally light->dark, which mirrors the
+# small->large N ordering (small N most variable -> lightest).
+N_cols  <- c("#E6B800",   # goldenrod (yellow), N = 1,000
+             "#D62728",   # red,                N = 10,000
+             "#1F77B4")   # blue,               N = 100,000
+det_col <- "black"
+
+# Same y-limits across columns so the two scenarios are directly comparable
+ylim_cuminc <- c(0, 1)
+all_inf_max <- max(
+  det_int$inf_sh, det_noint$inf_sh,
+  unlist(lapply(summ$intervention$inf_sh,    function(s) s$q95)),
+  unlist(lapply(summ$no_intervention$inf_sh, function(s) s$q95))
+)
+ylim_infsh <- c(0, all_inf_max)
+
+draw_panel <- function(scenario, var, det_curve, det_time,
+                       ylim, ylab, show_xaxis = FALSE,
+                       show_legend = FALSE) {
+  
+  plot(det_time, det_curve, type = "n",
+       xlab = "", ylab = ylab,
+       ylim = ylim,
+       xaxt = if (show_xaxis) "s" else "n")
+  abline(v = c(t1, t2_det), col = "grey60", lty = 3)
+  
+  # 1. 95th quantile lines (dashed), drawn first so median sits on top
+  for (k in seq_along(N)) {
+    s <- summ[[scenario]][[var]][[k]]
+    lines(t, s$q95, col = N_cols[k], lwd = 1.0, lty = 2)
+  }
+  # 2. Median lines (solid)
+  for (k in seq_along(N)) {
+    s <- summ[[scenario]][[var]][[k]]
+    lines(t, s$median, col = N_cols[k], lwd = 1.8, lty = 1)
+  }
+  # 3. Deterministic on top, slightly bolder
+  lines(det_time, det_curve, col = det_col, lwd = 2.6, lty = 1)
+  
+  if (show_legend) {
+    legend("bottomright",
+           legend = c("Deterministic",
+                      paste0("Median, ",   N_lab),
+                      paste0("95% quant., ", N_lab)),
+           col    = c(det_col, N_cols, N_cols),
+           lwd    = c(2.6,    rep(1.8, n_N), rep(1.0, n_N)),
+           lty    = c(1,      rep(1,   n_N), rep(2,   n_N)),
+           bty = "n", cex = 0.7)
+  }
+}
+
+png(out_path, width = 9.5, height = 8, units = "in", res = 300)
+layout(matrix(1:6, nrow = 3, byrow = TRUE), heights = c(1, 1, 0.55))
+par(mar = c(2.5, 4.5, 2, 1), oma = c(3, 0, 2, 0))
+
+# Row 1: cumulative incidence
+draw_panel("intervention",    "cum_inc", det_int$cum_inc,   det_int$time,
+           ylim_cuminc, "Cumulative incidence",
+           show_xaxis = FALSE, show_legend = TRUE)
+mtext(sprintf("With intervention", #  (lev=%.2f, budget=%.0f, start=%.1f)
+              lev, budget, t1),
+      side = 3, line = 0.5, cex = 0.95, font = 2)
+
+draw_panel("no_intervention", "cum_inc", det_noint$cum_inc, det_noint$time,
+           ylim_cuminc, "",
+           show_xaxis = FALSE, show_legend = FALSE)
+mtext("No intervention", side = 3, line = 0.5, cex = 0.95, font = 2)
+
+# Row 2: infectious share
+draw_panel("intervention",    "inf_sh", det_int$inf_sh,   det_int$time,
+           ylim_infsh, "Infectious share",
+           show_xaxis = FALSE, show_legend = FALSE)
+draw_panel("no_intervention", "inf_sh", det_noint$inf_sh, det_noint$time,
+           ylim_infsh, "",
+           show_xaxis = FALSE, show_legend = FALSE)
+
+# Row 3: control
+par(mar = c(4, 4.5, 0.5, 1))
+plot(det_int$time, det_u_int, type = "l", lwd = 2.6, col = det_col,
+     xlab = "Time", ylab = "Control u(t)", ylim = c(0, 1))
+abline(v = c(t1, t2_det), col = "grey60", lty = 3)
+
+plot(det_noint$time, det_u_noint, type = "l", lwd = 2.6, col = det_col,
+     xlab = "Time", ylab = "", ylim = c(0, 1))
+
+mtext(sprintf("%d stochastic replicates per N — pointwise median (solid) and 95th quantile (dashed)",
+              n_rep),
+      side = 1, line = 1.5, outer = TRUE, cex = 0.85, col = "grey30")
+
+dev.off()
+cat(sprintf("\nWrote %s\n", out_path))
+
+# Save raw summaries so the figure can be re-rendered without rerunning
+saveRDS(list(t = t, t1 = t1, t2_det = t2_det,
+             det_int = det_int, det_noint = det_noint,
+             det_u_int = det_u_int, det_u_noint = det_u_noint,
+             N = N,
+             summ = summ),
+        file = file.path(out_dir, "Exp1_option_A_summaries.rds"))
+cat(sprintf("Wrote %s\n", file.path(out_dir, "Exp1_option_A_summaries.rds")))
