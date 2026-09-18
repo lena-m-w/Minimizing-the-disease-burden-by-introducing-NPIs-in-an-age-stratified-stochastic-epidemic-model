@@ -61,7 +61,10 @@ Minimizing-the-disease-burden-by-introducing-NPIs-in-an-age-stratified-stochasti
 |       ├── data_preperation/
 │       │   └── contact_matrix.R   
 |       ├── Experiment_age/
-│       │   └── contact_matrix.R 
+│       │   └── Exp8_optimal_split_and_timing.R
+│       ├── other_experiments/
+│       │   ├── Exp1_Trajectory_population_size_with_without_intervention.R
+│       │   └── Exp3-6_influx_vs_no_influx.R
 │       └── functions/   
 │           ├── Simulations_deterministic/ 
 │           │   ├── det_SIR_with_influx.R
